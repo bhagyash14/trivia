@@ -8,34 +8,45 @@ from models import setup_db, Question, Category
 
 NUM_OF_QUESTIONS_PER_PAGE = 10
 
-  # create and configure the app
-  def create_app(test_config=None):
-    app = Flask(__name__)
-    setup_db(app)
-    CORS(app, resources={'/': {'origins': '*'}})
+#Utility to get paginated output
+def get_paginated_data(request, selection):
+  page = request.args.get('page', 1, type=int)
+  start = (page - 1) * NUM_OF_QUESTIONS_PER_PAGE
+  end = start + NUM_OF_QUESTIONS_PER_PAGE
 
-    @app.after_request
-    def after_request(response):
-      response.headers.add('Access-Control-Allow-Headers',
-                             'Content-Type,Authorization,true')
-      response.headers.add('Access-Control-Allow-Methods',
-                             'GET,PUT,POST,DELETE,OPTIONS')
-      return response
+  questions = [question.format() for question in selection]
+  current_questions = questions[start:end]
+
+  return current_questions
+
+# create and configure the app
+def create_app(test_config=None):
+  app = Flask(__name__)
+  setup_db(app)
+  CORS(app, resources={'/': {'origins': '*'}})
+
+  @app.after_request
+  def after_request(response):
+    response.headers.add('Access-Control-Allow-Headers',
+                           'Content-Type,Authorization,true')
+    response.headers.add('Access-Control-Allow-Methods',
+                           'GET,PUT,POST,DELETE,OPTIONS')
+    return response
 
   #Create an endpoint to handle GET requests for all available categories.
   @app.route('/categories')
   def get_categories():
-      try:
-        categories = Category.query.all()
-        categories_dict = {}
-        for category in categories:
-          categories_dict[category.id] = category.type
-        return jsonify({
-            'success': True,
-            'categories': categories_dict
-        }),200
-      except Exception:
-          abort(404)
+    try:
+      categories = Category.query.all()
+      categories_dict = {}
+      for category in categories:
+        categories_dict[category.id] = category.type
+      return jsonify({
+          'success': True,
+          'categories': categories_dict
+      }),200
+    except Exception:
+        abort(404)
 
   #Create an endpoint to handle GET requests for questions 
   @app.route('/questions')
@@ -71,7 +82,7 @@ NUM_OF_QUESTIONS_PER_PAGE = 10
             question.delete()
             return jsonify({
                 'success': True,
-                'message': "Question has been deleted"
+                'message': "Question has been deleted",
                 'deleted': id
             }),200
 
@@ -110,12 +121,13 @@ NUM_OF_QUESTIONS_PER_PAGE = 10
   @app.route('/questions/search', methods=['POST'])
   def search_questions():
         input_data = request.get_json()
-        search_term = input_data.get('searchTerm')
+        search_term = input_data.get('searchTerm','')
         
-        if (input_data.get('searchTerm')):
-            
-            result_set = Question.query.
-                filter(Question.question.ilike(f'%{search_term}%')).all()
+        if search_term == '':
+            abort(422)
+
+        try:    
+            result_set = Question.query.filter(Question.question.ilike(f'%{search_term}%')).all()
 
             if (len(result_set) == 0):
                 abort(404)
@@ -125,23 +137,25 @@ NUM_OF_QUESTIONS_PER_PAGE = 10
                 'success': True,
                 'questions': paginated_result,
             }),200
+        except Exception:
+            abort(404)
 
   #Create a GET endpoint to get questions based on category. 
   
   @app.route('/categories/<int:id>/questions')
   def get_questions_by_category(id):
-        category = Category.query.filter_by(id=id).one_or_none()
-        if (category is None):
-            abort(400)
+    category = Category.query.filter_by(id=id).one_or_none()
+    if (category is None):
+      abort(400)
 
-        result_set = Question.query.filter_by(category=category.id).all()
-        paginated_output = get_paginated_data(request, result_set)
+    questions = Question.query.filter_by(category=id).all()
+    paginated_output = get_paginated_data(request,questions)
 
-        return jsonify({
-            'success': True,
-            'current_category': category.type
-            'questions': paginated_output            
-        })
+    return jsonify({
+        'total_questions': len(questions),
+        'current_category': category.type,
+        'questions': paginated_output
+    })
 
   #Create a POST endpoint to get questions to play the quiz.
   
@@ -208,16 +222,6 @@ NUM_OF_QUESTIONS_PER_PAGE = 10
             "message": "Unprocessable Entity"
         }), 422
 
-  #Utility to get paginated output
-  def get_paginated_data(request, selection):
-    page = request.args.get('page', 1, type=int)
-    start = (page - 1) * NUM_OF_QUESTIONS_PER_PAGE
-    end = start + NUM_OF_QUESTIONS_PER_PAGE
-
-    questions = [question.format() for question in selection]
-    current_questions = questions[start:end]
-
-    return current_questions
-
   return app
+
 
