@@ -160,42 +160,30 @@ def create_app(test_config=None):
   #Create a POST endpoint to get questions to play the quiz.
   
   @app.route('/quizzes', methods=['POST'])
-  def get_random_quiz_question():
-        input_data = request.get_json()
-        previous_questions = input_data.get('previous_questions')
-        quiz_category = input_data.get('quiz_category')
+  def play_quiz_question():
+      try: 
+        data = request.get_json()
+        old_questions = data.get('previous_questions')
+        question_category = data.get('quiz_category')
 
-        if ((previous_questions is None) or (quiz_category is None)):
-            abort(400)
+        if ((question_category == '') or (old_questions == '')):
+            abort(422)
 
-        if (quiz_category['id'] == 0):
-            questions = Question.query.all()
+        if (question_category['id'] == 0):
+            available_questions = Question.query.all()
         else:
-            questions = Question.query.filter_by(category=quiz_category['id']).all()
+            available_questions = Question.query.filter_by(
+                category=question_category['id']).all()
 
-        total = len(questions)
-
-        def get_random_question():
-            return questions[random.randrange(0, len(questions), 1)]
-
-        def check_if_previously_used(question):
-            used_peviously_flag = False
-            for q in previous_questions:
-                if (q == question.id):
-                    used_peviously_flag = True
-
-            return used_peviously_flag
-
-        question = get_random_question()
-
-        while (check_if_previously_used(question)):
-            question = get_random_question()
-
+        random_question = available_questions[random.randint(0, len(available_questions)-1)]
+        
         return jsonify({
             'success': True,
-            'question': question.format()
-        }),200
-  
+            'question': random_question.format(),
+        }), 200
+      except:
+        abort(422)
+
   #Create error handlers for all expected errors including 404 and 422. 
   @app.errorhandler(400)
   def bad_request(error):
