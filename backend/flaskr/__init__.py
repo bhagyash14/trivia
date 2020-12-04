@@ -44,8 +44,8 @@ def create_app(test_config=None):
       return jsonify({
           'success': True,
           'categories': categories_list
-      }),200
-    except Exception:
+      })
+    except:
         abort(404)
 
   #Create an endpoint to handle GET requests for questions 
@@ -67,8 +67,8 @@ def create_app(test_config=None):
             'categories': categories_dict,
             'total_questions': questions_count,
             'questions': this_page_questions
-        }),200
-      except Exception:
+        })
+      except:
           abort(404)
 
   #Create an endpoint to DELETE question using a question ID. 
@@ -136,8 +136,8 @@ def create_app(test_config=None):
             return jsonify({
                 'success': True,
                 'questions': paginated_result,
-            }),200
-        except Exception:
+            })
+        except:
             abort(404)
 
   #Create a GET endpoint to get questions based on category. 
