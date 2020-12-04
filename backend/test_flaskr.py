@@ -50,7 +50,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Unprocessable entity')
 
     def test_get_all_questions(self):
-        response = self.client().get('/categories')
+        response = self.client().get('/questions')
         data = json.loads(response.data)
 
         self.assertEqual(response.status_code, 200)
