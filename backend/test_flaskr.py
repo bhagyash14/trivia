@@ -47,7 +47,7 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(response.status_code, 422)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'Unprocessable entity')
+        self.assertEqual(data['message'], 'Unprocessable Entity')
 
     def test_get_all_questions(self):
         response = self.client().get('/questions')
@@ -67,10 +67,10 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Resource not found')
 
     def test_success_delete_question(self):
-        question = Question(question=self.new_question['question'], 
-                            answer=self.new_question['answer'],
-                            category=self.new_question['category'], 
-                            difficulty=self.new_question['difficulty'])
+        question = Question(question='new question', 
+                            answer='new answer',
+                            category=2, 
+                            difficulty=1)
         question.insert()
         qid = question.id
         questions_before_delete = Question.query.all()
@@ -97,9 +97,16 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Resource not found')
 
     def test_success_create_new_question(self):
+        
         questions_before_post = Question.query.all()
+        new_question = {
+            'question': 'new question',
+            'answer': 'new answer',
+            'difficulty': 1,
+            'category': 1
+        }
 
-        response = self.client().post('/questions', json=self.new_question)
+        response = self.client().post('/questions', json=new_question)
         data = json.loads(response.data)
 
         questions_after_post = Question.query.all()
@@ -126,7 +133,7 @@ class TriviaTestCase(unittest.TestCase):
 
     def test_search_for_question(self):
         request_data = {
-            'searchTerm': 'Donald Trump',
+            'searchTerm': 'Cassius Clay',
         }
         response = self.client().post('/questions/search', json=request_data)
         data = json.loads(response.data)
@@ -143,7 +150,7 @@ class TriviaTestCase(unittest.TestCase):
         
         self.assertEqual(response.status_code, 422)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'Unprocessable entity')
+        self.assertEqual(data['message'], 'Unprocessable Entity')
 
     
 
