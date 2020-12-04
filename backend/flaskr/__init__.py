@@ -37,13 +37,13 @@ def create_app(test_config=None):
   @app.route('/categories')
   def get_categories():
     try:
-      categories = Category.query.all()
-      categories_dict = {}
-      for category in categories:
-        categories_dict[category.id] = category.type
+      all_categories = Category.query.all()
+      categories_list = {}
+      for category in all_categories:
+        categories_list[category.id] = category.type
       return jsonify({
           'success': True,
-          'categories': categories_dict
+          'categories': categories_list
       }),200
     except Exception:
         abort(404)
@@ -76,7 +76,7 @@ def create_app(test_config=None):
   def delete_question(id):
         try:
             question = Question.query.filter_by(id=id).one_or_none()
-            if question is None:
+            if question == '':
                 abort(404)
 
             question.delete()
@@ -178,6 +178,15 @@ def create_app(test_config=None):
                 category=question_category['id']).all()
 
         random_question = available_questions[random.randint(0, len(available_questions)-1)]
+        def filter_used_questions(random_question):
+            asked_already=False
+            for ques in old_questions:
+                if(random_question.id == ques):
+                        asked_already=True
+            return asked_already
+
+        while(filter_used_questions(random_question)):
+            random_question = available_questions[random.randint(0, len(available_questions)-1)]
         
         return jsonify({
             'success': True,
