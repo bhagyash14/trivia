@@ -96,8 +96,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Resource not found')
 
-    def test_success_create_new_question(self):
-        
+    def test_success_create_new_question(self):        
         questions_before_post = Question.query.all()
         new_question = {
             'question': 'new question',
@@ -105,17 +104,13 @@ class TriviaTestCase(unittest.TestCase):
             'difficulty': 1,
             'category': 1
         }
-
         response = self.client().post('/questions', json=new_question)
         data = json.loads(response.data)
-
         questions_after_post = Question.query.all()
-        question = Question.query.filter_by(id=data['created']).one_or_none()
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertTrue(len(questions_after_post) - len(questions_before_post) == 1)
-        self.assertIsNotNone(question)
 
     def test_invalid_create_question(self):
         request = {
