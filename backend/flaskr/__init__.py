@@ -61,7 +61,10 @@ def create_app(test_config=None):
         categories_dict = {}
         for category in categories:
             categories_dict[category.id] = category.type
-        
+            
+        if(len(this_page_questions)==0):
+            abort(404)
+               
         return jsonify({
             'success': True,
             'categories': categories_dict,
