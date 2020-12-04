@@ -322,11 +322,16 @@ curl http://127.0.0.1:5000/questions/search -X POST -H "Content-Type: applicatio
 POST /quizzes
 --a POST endpoint to get questions to play the quiz
 Expected o/p:
- curl http://127.0.0.1:5000/questions -X POST -H "Content-Type: application/json" -d '{ "question": "Which is the biggest ocean?", "answer": "Pacific", "difficulty": 3, "category": "3" }'
- 
+$ curl http://127.0.0.1:5000/quizzes -X POST -H "Content-Type: application/json" -d '{"previous_questions": [10, 11], "quiz_category": {"type": "Entertainment", "id": "5"}}'
 {
-   "message": "Question has been posted successfully!!",
-   "success": true
+  "question": {
+    "answer": "Tom Cruise",
+    "category": 5,
+    "difficulty": 4,
+    "id": 4,
+    "question": "What actor did author Anne Rice first denounce, then praise in the role of her beloved Lestat?"
+  },
+  "success": true
 }
 
  
