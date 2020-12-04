@@ -65,7 +65,7 @@ def create_app(test_config=None):
         return jsonify({
             'success': True,
             'categories': categories_dict,
-            'questions_count': questions_count,
+            'total_questions': questions_count,
             'questions': this_page_questions
         }),200
       except Exception:
@@ -187,6 +187,11 @@ def create_app(test_config=None):
 
         while(filter_used_questions(random_question)):
             random_question = available_questions[random.randint(0, len(available_questions)-1)]
+            if(len(old_questions) == len(available_questions)):
+                      return jsonify({
+                        "success":True,
+                        "message":"Questions exhausted"})       
+            
         
         return jsonify({
             'success': True,
