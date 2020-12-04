@@ -151,6 +151,41 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(response.status_code, 422)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Unprocessable Entity')
+        
+    def test_success_get_questions_per_category(self):
+        response = self.client().get('/categories/4/questions')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(len(data['questions']))
+        self.assertTrue(data['current_category'])
+
+    def test_failure_get_questions_per_category(self):
+        response = self.client().get('/categories/abcx/questions')
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(data["success"], false)
+        self.assertEqual(data["message"], "Resource not found")
+        
+    def test_success_quiz(self):
+        quiz_question = {'previous_questions': [10,11],
+                          'quiz_category': {'type': 'Entertainment', 'id': 5}}
+
+        response = self.client().post('/quizzes', json=quiz_question)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_failure_quiz(self):
+        new_quiz_round = {'previous_questions': [], 'quiz_category': {}}
+        response = self.client().post('/quizzes', json=new_quiz_round)
+        data = json.loads(response.data)
+
+        self.assertEqual(response.status_code, 422)
+        self.assertEqual(data["success"], false)
+        self.assertEqual(data["message"], "Unprocessable Entity")
 
     
 
